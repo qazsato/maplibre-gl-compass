@@ -1,24 +1,19 @@
 import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.ts'
+import { Map, addProtocol, NavigationControl, GeolocateControl } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import { Protocol } from 'pmtiles'
+import { CompassControl } from './maplibre-gl-compass'
+import './maplibre-gl-compass.css'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
-`
-
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+const map = new Map({
+  container: 'app',
+  style: 'https://tiles.geodig.jp/styles/basic.json',
+  center: [139.7538, 35.6674],
+  zoom: 11,
+  hash: true
+})
+const protocol = new Protocol()
+addProtocol('pmtiles', protocol.tile)
+map.addControl(new CompassControl(), 'top-right')
+map.addControl(new NavigationControl({ showCompass: true }), 'top-right')
+map.addControl(new GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }), 'top-right')

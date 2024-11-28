@@ -1,0 +1,30 @@
+.maplibregl-ctrl {
+  button.maplibregl-ctrl-compass-heading {
+    .maplibregl-ctrl-icon {
+      background-image: url(./compass.svg);
+    }
+  }
+
+  button.maplibregl-ctrl-compass-heading:disabled {
+    .maplibregl-ctrl-icon {
+      background-image: url(./compass-disabled.svg);
+    }
+  }
+
+  button.maplibregl-ctrl-compass-heading.maplibregl-ctrl-compass-heading-active {
+    .maplibregl-ctrl-icon {
+      background-image: url(./compass-active.svg);
+    }
+  }
+
+  button.maplibregl-ctrl-compass-heading.maplibregl-ctrl-compass-heading-waiting {
+    .maplibregl-ctrl-icon {
+      animation: maplibregl-spin 2s infinite linear;
+    }
+  }
+}
+
+@keyframes maplibregl-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
