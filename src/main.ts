@@ -9,8 +9,7 @@ const map = new Map({
   container: 'app',
   style: 'https://api.protomaps.com/styles/v4/light/en.json?key=afde32549db516d8',
   center: [139.7538, 35.6674],
-  zoom: 11,
-  hash: true
+  zoom: 11
 })
 const protocol = new Protocol()
 addProtocol('pmtiles', protocol.tile)

@@ -1,27 +1,31 @@
 import { IControl, Map } from 'maplibre-gl'
 
+// https://developer.mozilla.org/ja/docs/Web/API/DeviceOrientationEvent
+export type WebkitDeviceOrientationEvent = DeviceOrientationEvent & {
+  webkitCompassHeading: number | undefined
+  webkitCompassAccuracy: number | undefined
+}
+
 type CompassControlOptions = {
-  tilt?: number
   accuracy?: number
-  debug?: boolean
   timeout?: number
+  debug?: boolean
 }
 
 const defaultOptions: CompassControlOptions = {
-  tilt: 0,
-  accuracy: 10,
-  debug: false,
   timeout: 3000, // ms
+  debug: false,
 }
 
 export class CompassControl implements IControl {
   private map: Map | undefined
-  private button: HTMLElement | undefined
+  private button: HTMLButtonElement | undefined
   private debugView: HTMLElement | undefined
   private options: CompassControlOptions
 
   private active = false
-  private currentCompassHeading: number | undefined
+  private currentHeading: number | undefined
+  private currentAccuracy: number | undefined
 
   constructor (options?: CompassControlOptions) {
     this.options = { ...defaultOptions, ...options }
@@ -32,8 +36,12 @@ export class CompassControl implements IControl {
     this.button = this.createButton()
 
     const container = document.createElement('div')
-    container.appendChild(this.button)
-
+    // compassButton
+    const buttonContainer = document.createElement('div')
+    buttonContainer.classList.add('maplibregl-ctrl', 'maplibregl-ctrl-group')
+    buttonContainer.appendChild(this.button)
+    container.appendChild(buttonContainer)
+    // debugView
     if (this.options.debug) {
       this.debugView = this.createDebugView()
       container.appendChild(this.debugView)
@@ -47,9 +55,6 @@ export class CompassControl implements IControl {
   }
 
   private createButton () {
-    const container = document.createElement('div')
-    container.classList.add('maplibregl-ctrl', 'maplibregl-ctrl-group')
-
     const button = document.createElement('button')
     button.classList.add('maplibregl-ctrl-compass-heading')
     button.addEventListener('click', () => this.onClick())
@@ -58,9 +63,7 @@ export class CompassControl implements IControl {
     span.classList.add('maplibregl-ctrl-icon')
 
     button.appendChild(span)
-    container.appendChild(button)
-
-    return container
+    return button
   }
 
   private createDebugView () {
@@ -68,11 +71,8 @@ export class CompassControl implements IControl {
     div.classList.add('maplibregl-ctrl')
     div.innerHTML = `
     <ul class="maplibregl-ctrl-compass-heading-debug">
-      <li><b>heading</b>: <span class="heading"></span></li>
+      <li><b>bearing</b>: <span class="heading"></span></li>
       <li><b>accuracy</b>: <span class="accuracy"></span></li>
-      <li>alpha: <span class="alpha"></span></li>
-      <li>beta: <span class="beta"></span></li>
-      <li>gamma: <span class="gamma"></span></li>
     </ul>
     `
     return div
@@ -81,8 +81,14 @@ export class CompassControl implements IControl {
   private onClick () {
     this.active ? this.turnOff() : this.turnOn()
     this.active = !this.active
-  }
 
+    this.map?.on('touchmove', () => {
+      if (this.active) {
+        this.turnOff()
+        this.active = false
+      }
+    })
+  }
 
   enableDeviceOrientation() {
     // For iOS 13 and later
@@ -106,25 +112,35 @@ export class CompassControl implements IControl {
 
   private onDeviceOrientation = (event: DeviceOrientationEvent) =>{
     if (!this.map) return
-    // @ts-ignore
-    const heading = event.webkitCompassHeading
-    if (heading !== undefined) {
-      this.currentCompassHeading = heading
-      if (Math.abs(heading - this.map.getBearing()) >= 1) {
-        this.map?.setBearing(heading)
-      }
-      this.hideWaiting()
+    const webkitEvent = event as WebkitDeviceOrientationEvent
+    this.currentHeading = webkitEvent.webkitCompassHeading
+    this.currentAccuracy = webkitEvent.webkitCompassAccuracy
+    if (this.options.debug) {
+      this.writeDebugView()
     }
+    if (this.currentHeading === undefined) {
+      return
+    }
+    const bearing = this.map.getBearing()
+    if (this.options.accuracy && this.currentAccuracy && this.currentAccuracy < this.options.accuracy) {
+      return
+    }
+    if (Math.abs(this.currentHeading - bearing) >= 1) {
+      this.map?.setBearing(this.currentHeading)
+    }
+    this.hideWaiting()
+  }
 
-    if (this.options.debug && this.debugView) {
-      // @ts-ignore
-      const accuracy = event.webkitCompassAccuracy
-      this.debugView.querySelector('.heading')!.textContent = `${heading}`
-      this.debugView.querySelector('.accuracy')!.textContent = `${accuracy}`
-      this.debugView.querySelector('.alpha')!.textContent = `${event.alpha}`
-      this.debugView.querySelector('.beta')!.textContent = `${event.beta}`
-      this.debugView.querySelector('.gamma')!.textContent = `${event.gamma}`
-    }
+  private writeDebugView () {
+    if (!this.debugView) return
+    this.debugView.querySelector('.heading')!.textContent = `${this.currentHeading}`
+    this.debugView.querySelector('.accuracy')!.textContent = `${this.currentAccuracy}`
+  }
+
+  private clearDebugView () {
+    if (!this.debugView) return
+    this.debugView.querySelector('.heading')!.textContent = ''
+    this.debugView.querySelector('.accuracy')!.textContent = ''
   }
 
   private turnOff () {
@@ -132,6 +148,9 @@ export class CompassControl implements IControl {
     this.button.classList.remove('maplibregl-ctrl-compass-heading-active')
     window.removeEventListener('deviceorientation', this.onDeviceOrientation, true)
     this.hideWaiting()
+    if (this.options.debug) {
+      this.clearDebugView()
+    }
   }
 
   private turnOn () {
@@ -141,7 +160,7 @@ export class CompassControl implements IControl {
     this.enableDeviceOrientation()
 
     setTimeout(() => {
-      if (this.active && this.currentCompassHeading === undefined) {
+      if (this.active && this.currentHeading === undefined) {
         this.disableButton()
       }
     }, this.options.timeout)
