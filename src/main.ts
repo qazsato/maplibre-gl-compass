@@ -13,6 +13,19 @@ const map = new Map({
 })
 const protocol = new Protocol()
 addProtocol('pmtiles', protocol.tile)
-map.addControl(new CompassControl({ debug: true }), 'top-left')
+const compass = new CompassControl({
+  debug: true
+})
+
+compass.on('turnon', () => {
+  map.setPitch(45)
+})
+
+compass.on('turnoff', () => {
+  map.setPitch(0)
+  map.setBearing(0)
+})
+
+map.addControl(compass, 'top-left')
 map.addControl(new NavigationControl({ showCompass: true }), 'top-right')
 map.addControl(new GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: true }), 'top-right')
