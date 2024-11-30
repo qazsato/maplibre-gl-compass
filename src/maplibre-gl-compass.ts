@@ -11,12 +11,16 @@ type CompassControlOptions = {
   accuracy?: number
   timeout?: number
   debug?: boolean
+  visible?: boolean
 }
 
 const defaultOptions: CompassControlOptions = {
   timeout: 3000, // ms
   debug: false,
+  visible: true
 }
+
+const eventTypes = ['deviceorientation', 'turnon', 'turnoff']
 
 export class CompassControl implements IControl {
   private map: Map | undefined
@@ -27,6 +31,11 @@ export class CompassControl implements IControl {
   private active = false
   private currentHeading: number | undefined
   private currentAccuracy: number | undefined
+
+  // Callbacks
+  private deviceorientationCallback: ((event: WebkitDeviceOrientationEvent) => void) | undefined
+  private turnonCallback: (() => void) | undefined
+  private turnoffCallback: (() => void) | undefined
 
   constructor (options?: CompassControlOptions) {
     this.options = { ...defaultOptions, ...options }
@@ -41,6 +50,9 @@ export class CompassControl implements IControl {
     const buttonContainer = document.createElement('div')
     buttonContainer.classList.add('maplibregl-ctrl', 'maplibregl-ctrl-group')
     buttonContainer.appendChild(this.button)
+    if (!this.options.visible) {
+      buttonContainer.style.display = 'none'
+    }
     container.appendChild(buttonContainer)
     // debugView
     if (this.options.debug) {
@@ -48,11 +60,65 @@ export class CompassControl implements IControl {
       container.appendChild(this.debugView)
     }
 
+    this.map.on('touchmove', () => {
+      if (this.active) {
+        this.turnOff()
+        this.active = false
+      }
+    })
     return container
   }
 
   onRemove () {
     this.map = undefined
+  }
+
+  on (type: string, callback: any) {
+    if (!eventTypes.includes(type)) {
+      throw new Error(`Event type ${type} is not supported.`)
+    }
+    switch (type) {
+      case 'deviceorientation':
+        this.deviceorientationCallback = callback
+        break
+      case 'turnon':
+        this.turnonCallback = callback
+        break
+      case 'turnoff':
+        this.turnoffCallback = callback
+        break
+    }
+  }
+
+  turnOn () {
+    this.showWaiting()
+    this.button?.classList.add('maplibregl-ctrl-compass-heading-active')
+    this.enableDeviceOrientation()
+
+    setTimeout(() => {
+      if (this.active && this.currentHeading === undefined) {
+        this.disableButton()
+      }
+    }, this.options.timeout)
+
+    if (this.turnonCallback) {
+      this.turnonCallback()
+    }
+    this.active = true
+  }
+
+  turnOff () {
+    this.button?.classList.remove('maplibregl-ctrl-compass-heading-active')
+    window.removeEventListener('deviceorientation', this.onDeviceOrientation, true)
+    this.hideWaiting()
+    if (this.options.debug) {
+      this.clearDebugView()
+    }
+
+    if (this.turnoffCallback) {
+      this.turnoffCallback()
+    }
+    this.active = false
   }
 
   private createButton () {
@@ -81,17 +147,9 @@ export class CompassControl implements IControl {
 
   private onClick () {
     this.active ? this.turnOff() : this.turnOn()
-    this.active = !this.active
-
-    this.map?.on('touchmove', () => {
-      if (this.active) {
-        this.turnOff()
-        this.active = false
-      }
-    })
   }
 
-  enableDeviceOrientation() {
+  private enableDeviceOrientation() {
     // For iOS 13 and later
     // refs: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent#browser_compatibility
     if ('requestPermission' in window.DeviceOrientationEvent) {
@@ -111,11 +169,14 @@ export class CompassControl implements IControl {
     window.addEventListener('deviceorientation', this.onDeviceOrientation, true)
   }
 
-  private onDeviceOrientation = (event: DeviceOrientationEvent) =>{
+  private onDeviceOrientation = (event: DeviceOrientationEvent) => {
     if (!this.map) return
     const webkitEvent = event as WebkitDeviceOrientationEvent
     this.currentHeading = webkitEvent.webkitCompassHeading
     this.currentAccuracy = webkitEvent.webkitCompassAccuracy
+    if (this.deviceorientationCallback) {
+      this.deviceorientationCallback(webkitEvent)
+    }
     if (this.options.debug) {
       this.writeDebugView()
     }
@@ -144,34 +205,10 @@ export class CompassControl implements IControl {
     this.debugView.querySelector('.accuracy')!.textContent = ''
   }
 
-  private turnOff () {
-    if (!this.button) return
-    this.button.classList.remove('maplibregl-ctrl-compass-heading-active')
-    window.removeEventListener('deviceorientation', this.onDeviceOrientation, true)
-    this.hideWaiting()
-    if (this.options.debug) {
-      this.clearDebugView()
-    }
-  }
-
-  private turnOn () {
-    if (!this.button) return
-    this.showWaiting()
-    this.button.classList.add('maplibregl-ctrl-compass-heading-active')
-    this.enableDeviceOrientation()
-
-    setTimeout(() => {
-      if (this.active && this.currentHeading === undefined) {
-        this.disableButton()
-      }
-    }, this.options.timeout)
-  }
-
   private disableButton () {
     if (!this.button) return
     this.button.setAttribute('disabled', 'disabled')
-    this.button.classList.remove('maplibregl-ctrl-compass-heading-active')
-    this.hideWaiting()
+    this.turnOff()
   }
 
   private showWaiting () {
