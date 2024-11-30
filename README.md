@@ -26,6 +26,7 @@ npm install maplibre-gl-compass
 
 ```js
 import { Map } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { CompassControl } from 'maplibre-gl-compass'
 import 'maplibre-gl-compass/style.css'
 
@@ -38,6 +39,7 @@ map.addControl(new CompassControl())
 
 ```js
 import { Map } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { CompassControl } from 'maplibre-gl-compass'
 import type { WebkitDeviceOrientationEvent } from 'maplibre-gl-compass'
 import 'maplibre-gl-compass/style.css'
