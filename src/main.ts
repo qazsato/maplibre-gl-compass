@@ -3,7 +3,6 @@ import { Map, addProtocol, NavigationControl, GeolocateControl } from 'maplibre-
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { Protocol } from 'pmtiles'
 import { CompassControl } from './maplibre-gl-compass'
-import './maplibre-gl-compass.css'
 
 const map = new Map({
   container: 'app',
