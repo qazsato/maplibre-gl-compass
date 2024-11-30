@@ -1,6 +1,6 @@
 # maplibre-gl-compass
 
-A heading up compass for MapLibre GL JS 🧭
+A **heading-up** compass for MapLibre GL JS 🧭
 
 ## Setup
 

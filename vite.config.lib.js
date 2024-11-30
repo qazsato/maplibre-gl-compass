@@ -8,5 +8,5 @@ export default defineConfig({
       name: 'maplibre-gl-compass',
       fileName: 'maplibre-gl-compass'
     }
-  },
+  }
 })
