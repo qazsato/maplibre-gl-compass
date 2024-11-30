@@ -1,9 +1,11 @@
 {
   "name": "maplibre-gl-compass",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A heading up compass for MapLibre GL JS",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/maplibre-gl-compass.umd.cjs",
   "module": "./dist/maplibre-gl-compass.js",
   "exports": {
