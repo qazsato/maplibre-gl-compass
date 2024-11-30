@@ -23,7 +23,7 @@
     "build": "npm run build:lib && npm run build:app",
     "preview": "vite preview",
     "lint": "eslint src/*.ts src/**/*.ts tests/**/*.ts",
-    "lint:fix": "eslint src/*.ts src/**/*.ts tests/**/*.ts --fix",
+    "lint:fix": "npm run lint -- --fix",
     "test": "jest"
   },
   "devDependencies": {
