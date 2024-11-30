@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { describe, expect, beforeEach, it } from '@jest/globals'
 import { DebugView } from '../src/components/DebugView'
 

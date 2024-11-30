@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { describe, expect, beforeEach, it, jest } from '@jest/globals'
 import { CompassButton } from '../src/components/CompassButton'
 
