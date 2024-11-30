@@ -3,7 +3,7 @@ import './DevugView.css'
 export class DebugView {
   private element: HTMLElement
 
-  constructor (parent: HTMLElement) {
+  constructor(parent: HTMLElement) {
     this.element = document.createElement('div')
     this.element.classList.add('maplibregl-ctrl')
     this.element.innerHTML = `
@@ -15,7 +15,7 @@ export class DebugView {
     parent.appendChild(this.element)
   }
 
-  update (heading: string, accuracy: string) {
+  update(heading: string, accuracy: string) {
     const headingSpan = this.element.querySelector('.heading')
     const accuracySpan = this.element.querySelector('.accuracy')
     if (headingSpan) {

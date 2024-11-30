@@ -18,7 +18,7 @@ type CompassControlOptions = {
 const defaultOptions: CompassControlOptions = {
   timeout: 3000, // ms
   debug: false,
-  visible: true
+  visible: true,
 }
 
 const eventTypes = ['deviceorientation', 'turnon', 'turnoff']
@@ -34,11 +34,13 @@ export class CompassControl implements IControl {
   private currentHeading: number | undefined
   private currentAccuracy: number | undefined
 
-  private deviceorientationCallback: ((event: WebkitDeviceOrientationEvent) => void) | undefined
+  private deviceorientationCallback:
+    | ((event: WebkitDeviceOrientationEvent) => void)
+    | undefined
   private turnonCallback: (() => void) | undefined
   private turnoffCallback: (() => void) | undefined
 
-  constructor (options?: CompassControlOptions) {
+  constructor(options?: CompassControlOptions) {
     this.options = { ...defaultOptions, ...options }
     this.compassButton = new CompassButton(this.container)
     this.compassButton.on('click', () => this.onClick())
@@ -47,7 +49,7 @@ export class CompassControl implements IControl {
     }
   }
 
-  onAdd (map: Map) {
+  onAdd(map: Map) {
     this.map = map
     this.map.on('touchmove', () => {
       if (this.active) {
@@ -58,12 +60,12 @@ export class CompassControl implements IControl {
     return this.container
   }
 
-  onRemove () {
+  onRemove() {
     this.map = undefined
     this.turnOff()
   }
 
-  on (type: string, callback: any) {
+  on(type: string, callback: any) {
     if (!eventTypes.includes(type)) {
       throw new Error(`Event type ${type} is not supported.`)
     }
@@ -80,7 +82,7 @@ export class CompassControl implements IControl {
     }
   }
 
-  turnOn () {
+  turnOn() {
     this.compassButton.turnOn()
     this.enableDeviceOrientation()
 
@@ -96,9 +98,13 @@ export class CompassControl implements IControl {
     this.active = true
   }
 
-  turnOff () {
+  turnOff() {
     this.compassButton.turnOff()
-    window.removeEventListener('deviceorientation', this.onDeviceOrientation, true)
+    window.removeEventListener(
+      'deviceorientation',
+      this.onDeviceOrientation,
+      true,
+    )
     if (this.options.debug) {
       this.clearDebugView()
     }
@@ -108,8 +114,12 @@ export class CompassControl implements IControl {
     this.active = false
   }
 
-  private onClick () {
-    this.active ? this.turnOff() : this.turnOn()
+  private onClick() {
+    if (this.active) {
+      this.turnOff()
+    } else {
+      this.turnOn()
+    }
   }
 
   private enableDeviceOrientation() {
@@ -118,15 +128,20 @@ export class CompassControl implements IControl {
     if ('requestPermission' in window.DeviceOrientationEvent) {
       // @ts-ignore
       window.DeviceOrientationEvent.requestPermission()
-      .then((response: string) => {
-        if (response === 'granted') {
-          window.addEventListener('deviceorientation', this.onDeviceOrientation, true)
-        } else {
+        .then((response: string) => {
+          if (response === 'granted') {
+            window.addEventListener(
+              'deviceorientation',
+              this.onDeviceOrientation,
+              true,
+            )
+          } else {
+            this.disable()
+          }
+        })
+        .catch(() => {
           this.disable()
-        }
-      }).catch(() => {
-        this.disable()
-      })
+        })
       return
     }
     window.addEventListener('deviceorientation', this.onDeviceOrientation, true)
@@ -147,7 +162,11 @@ export class CompassControl implements IControl {
       return
     }
     const bearing = this.map.getBearing()
-    if (this.options.accuracy && this.currentAccuracy && this.currentAccuracy < this.options.accuracy) {
+    if (
+      this.options.accuracy &&
+      this.currentAccuracy &&
+      this.currentAccuracy < this.options.accuracy
+    ) {
       return
     }
     if (Math.abs(this.currentHeading - bearing) >= 1) {
@@ -156,15 +175,15 @@ export class CompassControl implements IControl {
     this.compassButton.stopLoading()
   }
 
-  private updateDebugView () {
+  private updateDebugView() {
     this.debugView?.update(`${this.currentHeading}`, `${this.currentAccuracy}`)
   }
 
-  private clearDebugView () {
+  private clearDebugView() {
     this.debugView?.update('', '')
   }
 
-  private disable () {
+  private disable() {
     this.compassButton.disable()
     this.turnOff()
   }

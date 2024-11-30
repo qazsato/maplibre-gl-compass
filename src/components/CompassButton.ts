@@ -17,7 +17,7 @@ export class CompassButton {
     parent.appendChild(buttonContainer)
   }
 
-  on (type: string, callback: any) {
+  on(type: string, callback: () => void) {
     if (!eventTypes.includes(type)) {
       throw new Error(`Event type ${type} is not supported.`)
     }
@@ -28,17 +28,17 @@ export class CompassButton {
     }
   }
 
-  turnOn () {
+  turnOn() {
     this.button.classList.add('maplibregl-ctrl-compass-heading-active')
     this.startLoading()
   }
 
-  turnOff () {
+  turnOff() {
     this.button.classList.remove('maplibregl-ctrl-compass-heading-active')
     this.stopLoading()
   }
 
-  disable () {
+  disable() {
     this.button.setAttribute('disabled', 'disabled')
   }
 
@@ -50,11 +50,13 @@ export class CompassButton {
     this.button.classList.remove('maplibregl-ctrl-compass-heading-waiting')
   }
 
-  private createButton () {
+  private createButton() {
     const button = document.createElement('button')
     button.classList.add('maplibregl-ctrl-compass-heading')
     button.addEventListener('click', () => {
-      this.clickCallback && this.clickCallback()
+      if (this.clickCallback) {
+        this.clickCallback()
+      }
     })
 
     const span = document.createElement('span')
