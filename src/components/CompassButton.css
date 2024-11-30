@@ -28,12 +28,3 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-.maplibregl-ctrl-compass-heading-debug {
-  width: 200px;
-  margin: 0;
-  padding: 5px 10px;
-  list-style: none;
-  background-color: #fff;
-  border-radius: 4px;
-}

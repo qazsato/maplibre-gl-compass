@@ -21,12 +21,21 @@
     "build:lib": "tsc && vite build --config vite.config.lib.js",
     "build:app": "tsc && vite build --config vite.config.app.js",
     "build": "npm run build:lib && npm run build:app",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint src/*.ts src/**/*.ts",
+    "lint:fix": "eslint src/*.ts src/**/*.ts --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.12.0",
     "maplibre-gl": "^4.7.1",
     "pmtiles": "^4.0.1",
+    "prettier": "^3.4.1",
     "typescript": "~5.6.2",
+    "typescript-eslint": "^8.16.0",
     "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0"
   },
