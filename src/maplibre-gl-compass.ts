@@ -1,4 +1,5 @@
 import { IControl, Map } from 'maplibre-gl'
+import './maplibre-gl-compass.css'
 
 // https://developer.mozilla.org/ja/docs/Web/API/DeviceOrientationEvent
 export type WebkitDeviceOrientationEvent = DeviceOrientationEvent & {

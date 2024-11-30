@@ -2,8 +2,17 @@
   "name": "maplibre-gl-compass",
   "version": "0.0.1",
   "description": "A heading up compass for MapLibre GL JS",
-  "main": "dist/maplibre-gl-compass.js",
   "type": "module",
+  "files": ["dist"],
+  "main": "./dist/maplibre-gl-compass.umd.cjs",
+  "module": "./dist/maplibre-gl-compass.js",
+  "exports": {
+    ".": {
+      "import": "./dist/maplibre-gl-compass.js",
+      "require": "./dist/maplibre-gl-compass.umd.cjs"
+    },
+    "./style.css": "./dist/maplibre-gl-compass.css"
+  },
   "scripts": {
     "dev": "vite",
     "build:lib": "tsc && vite build --config vite.config.lib.js",
