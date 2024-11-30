@@ -1,6 +1,6 @@
 import { IControl, Map } from 'maplibre-gl'
 import { CompassButton } from './components/CompassButton'
-import { DebugView } from './components/DevugView'
+import { DebugView } from './components/DebugView'
 
 // https://developer.mozilla.org/ja/docs/Web/API/DeviceOrientationEvent
 export type WebkitDeviceOrientationEvent = DeviceOrientationEvent & {

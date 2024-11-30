@@ -1,4 +1,4 @@
-import './DevugView.css'
+import './DebugView.css'
 
 export class DebugView {
   private element: HTMLElement
