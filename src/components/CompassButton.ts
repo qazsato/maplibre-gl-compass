@@ -30,15 +30,19 @@ export class CompassButton {
 
   turnOn() {
     this.button.classList.add('maplibregl-ctrl-compass-heading-active')
+    this.button.setAttribute('aria-pressed', 'true')
     this.startLoading()
   }
 
   turnOff() {
     this.button.classList.remove('maplibregl-ctrl-compass-heading-active')
+    this.button.setAttribute('aria-pressed', 'false')
     this.stopLoading()
   }
 
   disable() {
+    this.button.setAttribute('title', 'Compass not available')
+    this.button.setAttribute('aria-label', 'Compass not available')
     this.button.setAttribute('disabled', 'disabled')
   }
 
@@ -53,6 +57,8 @@ export class CompassButton {
   private createButton() {
     const button = document.createElement('button')
     button.classList.add('maplibregl-ctrl-compass-heading')
+    button.setAttribute('title', 'Rotate map to heading-up')
+    button.setAttribute('aria-label', 'Rotate map to heading-up')
     button.addEventListener('click', () => {
       if (this.clickCallback) {
         this.clickCallback()
