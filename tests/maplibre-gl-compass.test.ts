@@ -66,7 +66,7 @@ describe('CompassControl', () => {
       .spyOn(window.DeviceOrientationEvent as any, 'requestPermission')
       .mockResolvedValue('denied')
 
-    await compassControl['enableDeviceOrientation']()
+    await compassControl['listenDeviceOrientation']()
 
     expect(compassControl['active']).toBe(false)
 

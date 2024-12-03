@@ -1,8 +1,29 @@
+:root {
+  --header-height: 60px;
+}
+
 body {
   margin: 0;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
 }
 
 #app {
   width: 100vw;
   height: 100vh;
+}
+
+header {
+  padding: 0 20px;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+}
+
+#map {
+  height: calc(100% - var(--header-height));
 }
