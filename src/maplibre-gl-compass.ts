@@ -31,6 +31,8 @@ export class CompassControl implements IControl {
   private options: CompassControlOptions
 
   private active = false
+  private isZooming = false
+  private isPitching = false
   private currentHeading: number | undefined
   private currentAccuracy: number | undefined
   private currentCount: number = 0
@@ -58,6 +60,12 @@ export class CompassControl implements IControl {
         this.active = false
       }
     })
+
+    this.map.on('zoomstart', () => (this.isZooming = true))
+    this.map.on('zoomend', () => (this.isZooming = false))
+    this.map.on('pitchstart', () => (this.isPitching = true))
+    this.map.on('pitchend', () => (this.isPitching = false))
+
     return this.container
   }
 
@@ -169,6 +177,9 @@ export class CompassControl implements IControl {
       this.currentAccuracy &&
       this.currentAccuracy < this.options.accuracy
     ) {
+      return
+    }
+    if (this.isZooming || this.isPitching) {
       return
     }
     if (Math.abs(this.currentHeading - bearing) >= 1) {
