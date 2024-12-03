@@ -39,14 +39,18 @@ describe('CompassButton', () => {
     expect(
       button.classList.contains('maplibregl-ctrl-compass-heading-active'),
     ).toBe(true)
+    expect(button.getAttribute('aria-pressed')).toBe('true')
 
     compassButton.turnOff()
     expect(
       button.classList.contains('maplibregl-ctrl-compass-heading-active'),
     ).toBe(false)
+    expect(button.getAttribute('aria-pressed')).toBe('false')
 
     compassButton.disable()
     expect(button.disabled).toBe(true)
+    expect(button.getAttribute('title')).toBe('Compass not available')
+    expect(button.getAttribute('aria-label')).toBe('Compass not available')
   })
 
   it('should toggle loading state', () => {
