@@ -76,13 +76,11 @@ describe('CompassControl', () => {
   it('should update debug view when debug option is enabled', () => {
     const debugControl = new CompassControl({ debug: true })
     debugControl['currentHeading'] = 45
-    debugControl['currentAccuracy'] = 10
 
     debugControl['updateDebugView']()
     const debugContainer = debugControl['debugView']?.['element']
 
     expect(debugContainer?.querySelector('.heading')?.textContent).toBe('45')
-    expect(debugContainer?.querySelector('.accuracy')?.textContent).toBe('10')
   })
 
   it('should toggle state when clicked', () => {

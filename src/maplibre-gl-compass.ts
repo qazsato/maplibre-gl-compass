@@ -5,11 +5,9 @@ import { DebugView } from './components/DebugView'
 // https://developer.mozilla.org/ja/docs/Web/API/DeviceOrientationEvent
 export type WebkitDeviceOrientationEvent = DeviceOrientationEvent & {
   webkitCompassHeading: number | undefined
-  webkitCompassAccuracy: number | undefined
 }
 
 type CompassControlOptions = {
-  accuracy?: number
   timeout?: number
   debug?: boolean
   visible?: boolean
@@ -32,7 +30,6 @@ export class CompassControl implements IControl {
 
   private active = false
   private currentHeading: number | undefined
-  private currentAccuracy: number | undefined
 
   private deviceorientationCallback:
     | ((event: WebkitDeviceOrientationEvent) => void)
@@ -151,7 +148,6 @@ export class CompassControl implements IControl {
     if (!this.map) return
     const webkitEvent = event as WebkitDeviceOrientationEvent
     this.currentHeading = webkitEvent.webkitCompassHeading
-    this.currentAccuracy = webkitEvent.webkitCompassAccuracy
     if (this.deviceorientationCallback) {
       this.deviceorientationCallback(webkitEvent)
     }
@@ -162,13 +158,6 @@ export class CompassControl implements IControl {
       return
     }
     const bearing = this.map.getBearing()
-    if (
-      this.options.accuracy &&
-      this.currentAccuracy &&
-      this.currentAccuracy < this.options.accuracy
-    ) {
-      return
-    }
     if (Math.abs(this.currentHeading - bearing) >= 1) {
       this.map?.setBearing(this.currentHeading)
     }
@@ -176,11 +165,11 @@ export class CompassControl implements IControl {
   }
 
   private updateDebugView() {
-    this.debugView?.update(`${this.currentHeading}`, `${this.currentAccuracy}`)
+    this.debugView?.update(`${this.currentHeading}`)
   }
 
   private clearDebugView() {
-    this.debugView?.update('', '')
+    this.debugView?.update('')
   }
 
   private disable() {

@@ -18,28 +18,20 @@ describe('DebugView', () => {
     ).toBeTruthy()
   })
 
-  it('should update heading and accuracy values', () => {
-    debugView.update('180.123', '10.789')
+  it('should update heading values', () => {
+    debugView.update('180.123')
 
     const headingSpan = parentElement.querySelector('.heading')
-    const accuracySpan = parentElement.querySelector('.accuracy')
-
     expect(headingSpan?.textContent).toBe('180.123')
-    expect(accuracySpan?.textContent).toBe('10.789')
   })
 
   it('should handle missing elements gracefully', () => {
     const headingSpan = parentElement.querySelector('.heading')
-    const accuracySpan = parentElement.querySelector('.accuracy')
     headingSpan?.remove()
-    accuracySpan?.remove()
 
     const updatedHeadingSpan = parentElement.querySelector('.heading')
-    const updatedAccuracySpan = parentElement.querySelector('.accuracy')
 
-    expect(() => debugView.update('180.123', '10.789')).not.toThrow()
-
+    expect(() => debugView.update('180.123')).not.toThrow()
     expect(updatedHeadingSpan).toBeNull()
-    expect(updatedAccuracySpan).toBeNull()
   })
 })
