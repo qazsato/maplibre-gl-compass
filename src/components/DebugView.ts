@@ -8,7 +8,7 @@ export class DebugView {
     this.element.classList.add('maplibregl-ctrl')
     this.element.innerHTML = `
     <ul class="maplibregl-ctrl-compass-heading-debug">
-      <li><b>bearing</b>: <span class="heading"></span></li>
+      <li><b>heading</b>: <span class="heading"></span></li>
       <li><b>accuracy</b>: <span class="accuracy"></span></li>
     </ul>
     `
