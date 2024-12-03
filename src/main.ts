@@ -12,7 +12,7 @@ import { CompassControl } from './maplibre-gl-compass'
 const map = new Map({
   container: 'app',
   style:
-    'https://api.protomaps.com/styles/v4/light/en.json?key=afde32549db516d8',
+    'https://api.protomaps.com/styles/v4/white/en.json?key=afde32549db516d8',
   center: [139.7538, 35.6674],
   zoom: 11,
 })
@@ -29,7 +29,7 @@ map.on('wheel', () => {
 
 const protocol = new Protocol()
 addProtocol('pmtiles', protocol.tile)
-const compass = new CompassControl()
+const compass = new CompassControl({ debug: true })
 const navigation = new NavigationControl({ showCompass: true })
 const geolocate = new GeolocateControl({
   positionOptions: { enableHighAccuracy: true },
@@ -44,7 +44,7 @@ geolocate.on('userlocationlostfocus', () => {
 
 compass.on('turnon', () => {
   map.setPitch(45)
-  if (['OFF', 'BACKGROUND'].includes(geolocate._watchState)) {
+  if (!['ACTIVE_LOCK'].includes(geolocate._watchState)) {
     geolocate.trigger()
   }
 })

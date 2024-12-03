@@ -33,6 +33,7 @@ export class CompassControl implements IControl {
   private active = false
   private currentHeading: number | undefined
   private currentAccuracy: number | undefined
+  private currentCount: number = 0
 
   private deviceorientationCallback:
     | ((event: WebkitDeviceOrientationEvent) => void)
@@ -152,6 +153,7 @@ export class CompassControl implements IControl {
     const webkitEvent = event as WebkitDeviceOrientationEvent
     this.currentHeading = webkitEvent.webkitCompassHeading
     this.currentAccuracy = webkitEvent.webkitCompassAccuracy
+    this.currentCount += 1
     if (this.deviceorientationCallback) {
       this.deviceorientationCallback(webkitEvent)
     }
@@ -176,11 +178,16 @@ export class CompassControl implements IControl {
   }
 
   private updateDebugView() {
-    this.debugView?.update(`${this.currentHeading}`, `${this.currentAccuracy}`)
+    this.debugView?.update(
+      `${this.currentHeading}`,
+      `${this.currentAccuracy}`,
+      `${this.currentCount}`,
+    )
   }
 
   private clearDebugView() {
-    this.debugView?.update('', '')
+    this.currentCount = 0
+    this.debugView?.update('', '', '')
   }
 
   private disable() {
