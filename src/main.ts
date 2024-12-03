@@ -44,7 +44,7 @@ geolocate.on('userlocationlostfocus', () => {
 
 compass.on('turnon', () => {
   map.setPitch(45)
-  if (geolocate._watchState === 'OFF') {
+  if (['OFF', 'BACKGROUND'].includes(geolocate._watchState)) {
     geolocate.trigger()
   }
 })
