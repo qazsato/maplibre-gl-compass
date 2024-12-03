@@ -47,7 +47,6 @@ import 'maplibre-gl-compass/style.css'
 const map = new Map({/* YOUR_MAP_OPTION */})
 
 const compass = new CompassControl({
-  accuracy: 10.0, // If the accuracy is lower than this value, the map bearing will not be updated. Default is not set.
   debug: true,    // Show debug view. Default is false.
   timeout: 10000, // The maximum time to wait for a DeviceOrientationEvent. Default is 3000 [ms].
   visible: true,  // Show compass button. Default is true.
@@ -73,12 +72,11 @@ map.addControl(compass)
 
 ## Options
 
-| name     | default | description                                                                    |
-| -------- | ------- | ------------------------------------------------------------------------------ |
-| accuracy |         | If the accuracy is lower than this value, the map bearing will not be updated. |
-| debug    | false   | Show debug view.                                                               |
-| timeout  | 3000    | The maximum time[ms] to wait for a DeviceOrientationEvent.                     |
-| visible  | true    | Show compass button.                                                           |
+| name    | default | description                                                |
+| ------- | ------- | ---------------------------------------------------------- |
+| debug   | false   | Show debug view.                                           |
+| timeout | 3000    | The maximum time[ms] to wait for a DeviceOrientationEvent. |
+| visible | true    | Show compass button.                                       |
 
 ## Events
 
