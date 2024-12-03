@@ -10,7 +10,7 @@ import { Protocol } from 'pmtiles'
 import { CompassControl } from './maplibre-gl-compass'
 
 const map = new Map({
-  container: 'app',
+  container: 'map',
   style:
     'https://api.protomaps.com/styles/v4/light/en.json?key=afde32549db516d8',
   center: [139.7538, 35.6674],

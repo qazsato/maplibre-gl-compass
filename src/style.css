@@ -6,3 +6,19 @@ body {
   width: 100vw;
   height: 100vh;
 }
+
+header {
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+
+  h1 {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+#map {
+  height: calc(100% - 60px);
+}

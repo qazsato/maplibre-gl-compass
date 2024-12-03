@@ -41,7 +41,7 @@ map.addControl(new CompassControl())
 import { Map } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { CompassControl } from 'maplibre-gl-compass'
-import type { WebkitDeviceOrientationEvent } from 'maplibre-gl-compass'
+import type { CompassEvent } from 'maplibre-gl-compass'
 import 'maplibre-gl-compass/style.css'
 
 const map = new Map({/* YOUR_MAP_OPTION */})
@@ -63,7 +63,7 @@ compass.on('turnoff', () => {
   map.setBearing(0)
 })
 
-compass.on('deviceorientation', (event: WebkitDeviceOrientationEvent) => {
+compass.on('compass', (event: CompassEvent) => {
   // Your custom logic is here!
 })
 
@@ -80,11 +80,12 @@ map.addControl(compass)
 
 ## Events
 
-| name              | description                                                                                                                                                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| turnon            | Triggered when the compass is turned on.                                                                                                                                                                             |
-| turnoff           | Triggered when the compass is turned off.                                                                                                                                                                            |
-| deviceorientation | Triggered when the device orientation changes. For more details on event properties, refer to [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientation_event#event_properties). |
+| name    | description                                                                                                                                                                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| turnon  | Triggered when the compass is turned on.                                                                                                                                                                             |
+| turnoff | Triggered when the compass is turned off.                                                                                                                                                                            |
+| compass | Triggered when the device orientation changes. For more details on event properties, refer to [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientation_event#event_properties). |
+
 
 ## License
 
