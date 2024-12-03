@@ -1,5 +1,6 @@
 import { describe, expect, beforeEach, it } from '@jest/globals'
 import { DebugView } from '../src/components/DebugView'
+import { WebkitDeviceOrientationEvent } from '../src/maplibre-gl-compass'
 
 describe('DebugView', () => {
   let parentElement: HTMLElement
@@ -19,7 +20,12 @@ describe('DebugView', () => {
   })
 
   it('should update heading values', () => {
-    debugView.update('180.123')
+    debugView.update(180.123, {
+      type: 'deviceorientation',
+      alpha: 0,
+      beta: 0,
+      gamma: 0,
+    } as WebkitDeviceOrientationEvent)
 
     const headingSpan = parentElement.querySelector('.heading')
     expect(headingSpan?.textContent).toBe('180.123')
@@ -31,7 +37,14 @@ describe('DebugView', () => {
 
     const updatedHeadingSpan = parentElement.querySelector('.heading')
 
-    expect(() => debugView.update('180.123')).not.toThrow()
+    expect(() =>
+      debugView.update(180.123, {
+        type: 'deviceorientation',
+        alpha: 0,
+        beta: 0,
+        gamma: 0,
+      } as WebkitDeviceOrientationEvent),
+    ).not.toThrow()
     expect(updatedHeadingSpan).toBeNull()
   })
 })
