@@ -1,4 +1,4 @@
-import { WebkitDeviceOrientationEvent } from '../maplibre-gl-compass'
+import { WebkitDeviceOrientationEvent } from '../core/Compass'
 import './DebugView.css'
 
 export class DebugView {

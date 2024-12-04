@@ -1,6 +1,6 @@
 import { describe, expect, beforeEach, it } from '@jest/globals'
 import { DebugView } from '../src/components/DebugView'
-import { WebkitDeviceOrientationEvent } from '../src/maplibre-gl-compass'
+import { WebkitDeviceOrientationEvent } from '../src/core/Compass'
 
 describe('DebugView', () => {
   let parentElement: HTMLElement
