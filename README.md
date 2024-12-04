@@ -1,14 +1,11 @@
 # maplibre-gl-compass
 
-![test](https://github.com/qazsato/maplibre-gl-compass/actions/workflows/test.yml/badge.svg)
 [![npm version](https://badge.fury.io/js/maplibre-gl-compass.svg)](https://badge.fury.io/js/maplibre-gl-compass)
+[![npm downloads](https://img.shields.io/npm/dm/maplibre-gl-compass.svg)](https://badge.fury.io/js/maplibre-gl-compass)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A **heading-up** compass for MapLibre GL JS 🧭
 
-## About
-
-**maplibre-gl-compass** is a plugin for MapLibre GL JS.  
 This plugin rotates the map based on the values from the [Device orientation events](https://developer.mozilla.org/en-US/docs/Web/API/Device_orientation_events).  
 Therefore, it can only be used on devices equipped with an orientation sensor, such as mobile devices.
 
@@ -41,7 +38,7 @@ map.addControl(new CompassControl())
 import { Map } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { CompassControl } from 'maplibre-gl-compass'
-import type { CompassEvent } from 'maplibre-gl-compass'
+import type { CompassEvent, CompassError } from 'maplibre-gl-compass'
 import 'maplibre-gl-compass/style.css'
 
 const map = new Map({/* YOUR_MAP_OPTION */})
@@ -64,6 +61,10 @@ compass.on('turnoff', () => {
 })
 
 compass.on('compass', (event: CompassEvent) => {
+  // Your custom logic is here!
+})
+
+compass.on('error', (event: CompassError) => {
   // Your custom logic is here!
 })
 
