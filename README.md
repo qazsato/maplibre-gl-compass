@@ -9,7 +9,7 @@ A **heading-up** compass for MapLibre GL JS 🧭
 ## About
 
 **maplibre-gl-compass** is a plugin for MapLibre GL JS.  
-This plugin rotates the map based on the values from the [deviceorientation event](https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientation_event).  
+This plugin rotates the map based on the values from the [Device orientation events](https://developer.mozilla.org/en-US/docs/Web/API/Device_orientation_events).  
 Therefore, it can only be used on devices equipped with an orientation sensor, such as mobile devices.
 
 Demo page is [here](https://qazsato.github.io/maplibre-gl-compass).
@@ -41,15 +41,15 @@ map.addControl(new CompassControl())
 import { Map } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { CompassControl } from 'maplibre-gl-compass'
-import type { WebkitDeviceOrientationEvent } from 'maplibre-gl-compass'
+import type { CompassEvent } from 'maplibre-gl-compass'
 import 'maplibre-gl-compass/style.css'
 
 const map = new Map({/* YOUR_MAP_OPTION */})
 
 const compass = new CompassControl({
   debug: true,    // Show debug view. Default is false.
-  timeout: 10000, // The maximum time to wait for a DeviceOrientationEvent. Default is 3000 [ms].
   visible: true,  // Show compass button. Default is true.
+  timeout: 10000, // The maximum time to wait for a DeviceOrientationEvent. Default is 3000 [ms].
 })
 
 compass.on('turnon', () => {
@@ -63,7 +63,7 @@ compass.on('turnoff', () => {
   map.setBearing(0)
 })
 
-compass.on('deviceorientation', (event: WebkitDeviceOrientationEvent) => {
+compass.on('compass', (event: CompassEvent) => {
   // Your custom logic is here!
 })
 
@@ -75,16 +75,22 @@ map.addControl(compass)
 | name    | default | description                                                |
 | ------- | ------- | ---------------------------------------------------------- |
 | debug   | false   | Show debug view.                                           |
-| timeout | 3000    | The maximum time[ms] to wait for a DeviceOrientationEvent. |
 | visible | true    | Show compass button.                                       |
+| timeout | 3000    | The maximum time[ms] to wait for a DeviceOrientationEvent. |
 
 ## Events
 
-| name              | description                                                                                                                                                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| turnon            | Triggered when the compass is turned on.                                                                                                                                                                             |
-| turnoff           | Triggered when the compass is turned off.                                                                                                                                                                            |
-| deviceorientation | Triggered when the device orientation changes. For more details on event properties, refer to [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientation_event#event_properties). |
+| name    | description                                                                                                                                                                                                                                                 |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| turnon  | Fired when the compass is turned on.                                                                                                                                                                                                                        |
+| turnoff | Fired when the compass is turned off.                                                                                                                                                                                                                       |
+| error   | Fired when the compass cannot be accessed due to permission denied or a timeout.                                                                                                                                                                            |
+| compass | Fired when the device orientation changes. <br> A `heading` number represents the difference between the motion of the device around the z axis of the world system and the direction of the north, expressed in degrees with values ranging from 0 to 360. |
+
+## Reference
+
+- https://developer.apple.com/documentation/webkitjs/deviceorientationevent
+- https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientationabsolute_event
 
 ## License
 

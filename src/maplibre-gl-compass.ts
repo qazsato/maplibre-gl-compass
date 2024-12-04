@@ -2,24 +2,35 @@ import { IControl, Map } from 'maplibre-gl'
 import { CompassButton } from './components/CompassButton'
 import { DebugView } from './components/DebugView'
 
-// https://developer.mozilla.org/ja/docs/Web/API/DeviceOrientationEvent
+export type CompassError = {
+  code: 'TIMEOUT' | 'PERMISSION_DENIED'
+  message: string
+}
+
+export type CompassEvent = {
+  heading: number | undefined
+  originalEvent: WebkitDeviceOrientationEvent
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent
 export type WebkitDeviceOrientationEvent = DeviceOrientationEvent & {
-  webkitCompassHeading: number | undefined
+  webkitCompassHeading?: number
+  webkitCompassAccuracy?: number
 }
 
 type CompassControlOptions = {
-  timeout?: number
   debug?: boolean
   visible?: boolean
+  timeout?: number
 }
 
 const defaultOptions: CompassControlOptions = {
-  timeout: 3000, // ms
   debug: false,
   visible: true,
+  timeout: 3000, // ms
 }
 
-const eventTypes = ['deviceorientation', 'turnon', 'turnoff']
+const eventTypes = ['turnon', 'turnoff', 'error', 'compass']
 
 export class CompassControl implements IControl {
   private map: Map | undefined
@@ -29,13 +40,13 @@ export class CompassControl implements IControl {
   private options: CompassControlOptions
 
   private active = false
+  private currentEvent: WebkitDeviceOrientationEvent | undefined
   private currentHeading: number | undefined
 
-  private deviceorientationCallback:
-    | ((event: WebkitDeviceOrientationEvent) => void)
-    | undefined
   private turnonCallback: (() => void) | undefined
   private turnoffCallback: (() => void) | undefined
+  private errorCallback: ((error: CompassError) => void) | undefined
+  private compassCallback: ((event: CompassEvent) => void) | undefined
 
   constructor(options?: CompassControlOptions) {
     this.options = { ...defaultOptions, ...options }
@@ -67,25 +78,32 @@ export class CompassControl implements IControl {
       throw new Error(`Event type ${type} is not supported.`)
     }
     switch (type) {
-      case 'deviceorientation':
-        this.deviceorientationCallback = callback
-        break
       case 'turnon':
         this.turnonCallback = callback
         break
       case 'turnoff':
         this.turnoffCallback = callback
         break
+      case 'error':
+        this.errorCallback = callback
+        break
+      case 'compass':
+        this.compassCallback = callback
+        break
     }
   }
 
   turnOn() {
     this.compassButton.turnOn()
-    this.enableDeviceOrientation()
+    this.listenDeviceOrientation()
+    this.listenDeviceOrientationAbsolute()
 
     setTimeout(() => {
       if (this.active && this.currentHeading === undefined) {
         this.disable()
+        if (this.errorCallback) {
+          this.errorCallback({ code: 'TIMEOUT', message: 'Timeout' })
+        }
       }
     }, this.options.timeout)
 
@@ -99,6 +117,11 @@ export class CompassControl implements IControl {
     this.compassButton.turnOff()
     window.removeEventListener(
       'deviceorientation',
+      this.onDeviceOrientation,
+      true,
+    )
+    window.removeEventListener(
+      'deviceorientationabsolute',
       this.onDeviceOrientation,
       true,
     )
@@ -119,7 +142,7 @@ export class CompassControl implements IControl {
     }
   }
 
-  private enableDeviceOrientation() {
+  private listenDeviceOrientation() {
     // For iOS 13 and later
     // refs: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent#browser_compatibility
     if ('requestPermission' in window.DeviceOrientationEvent) {
@@ -134,22 +157,66 @@ export class CompassControl implements IControl {
             )
           } else {
             this.disable()
+            if (this.errorCallback) {
+              this.errorCallback({
+                code: 'PERMISSION_DENIED',
+                message: 'Permission denied',
+              })
+            }
           }
         })
         .catch(() => {
           this.disable()
+          if (this.errorCallback) {
+            this.errorCallback({
+              code: 'PERMISSION_DENIED',
+              message: 'Permission denied',
+            })
+          }
         })
       return
     }
     window.addEventListener('deviceorientation', this.onDeviceOrientation, true)
   }
 
+  private listenDeviceOrientationAbsolute() {
+    window.addEventListener(
+      'deviceorientationabsolute',
+      this.onDeviceOrientation,
+      true,
+    )
+  }
+
   private onDeviceOrientation = (event: DeviceOrientationEvent) => {
     if (!this.map) return
-    const webkitEvent = event as WebkitDeviceOrientationEvent
-    this.currentHeading = webkitEvent.webkitCompassHeading
-    if (this.deviceorientationCallback) {
-      this.deviceorientationCallback(webkitEvent)
+    this.currentEvent = event as WebkitDeviceOrientationEvent
+    this.currentHeading = this.calculateCompassHeading(this.currentEvent)
+
+    if (
+      this.currentEvent.type === 'deviceorientationabsolute' &&
+      this.currentEvent.alpha != null
+    ) {
+      window.removeEventListener(
+        'deviceorientation',
+        this.onDeviceOrientation,
+        true,
+      )
+    } else if (
+      this.currentEvent.type === 'deviceorientation' &&
+      this.currentEvent.webkitCompassHeading != null
+    ) {
+      window.removeEventListener(
+        'deviceorientationabsolute',
+        this.onDeviceOrientation,
+        true,
+      )
+    }
+
+    if (this.compassCallback) {
+      this.compassCallback({
+        heading: this.currentHeading,
+        originalEvent: this.currentEvent,
+      })
     }
     if (this.options.debug) {
       this.updateDebugView()
@@ -165,15 +232,29 @@ export class CompassControl implements IControl {
   }
 
   private updateDebugView() {
-    this.debugView?.update(`${this.currentHeading}`)
+    this.debugView?.update(this.currentHeading, this.currentEvent)
   }
 
   private clearDebugView() {
-    this.debugView?.update('')
+    this.debugView?.update()
   }
 
   private disable() {
     this.compassButton.disable()
     this.turnOff()
+  }
+
+  private calculateCompassHeading(event: WebkitDeviceOrientationEvent) {
+    if (event.webkitCompassHeading != null) {
+      return event.webkitCompassHeading
+    }
+    if (event.alpha == null) {
+      return undefined
+    }
+    let compassHeading = 360 - event.alpha
+    if (compassHeading < 0) {
+      compassHeading += 360
+    }
+    return compassHeading
   }
 }
