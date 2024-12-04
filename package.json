@@ -1,6 +1,6 @@
 {
   "name": "maplibre-gl-compass",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A heading-up compass for MapLibre GL JS",
   "type": "module",
   "files": [
