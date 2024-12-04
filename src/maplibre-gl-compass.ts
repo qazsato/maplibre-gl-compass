@@ -167,6 +167,15 @@ export class CompassControl implements IControl {
     if (!this.map) return
     this.currentEvent = event as WebkitDeviceOrientationEvent
     this.currentHeading = this.calculateCompassHeading(this.currentEvent)
+
+    if (event.type === 'deviceorientationabsolute' && event.alpha != null) {
+      window.removeEventListener(
+        'deviceorientation',
+        this.onDeviceOrientation,
+        true,
+      )
+    }
+
     if (this.compassCallback) {
       this.compassCallback({
         heading: this.currentHeading,
