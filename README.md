@@ -84,6 +84,7 @@ map.addControl(compass)
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | turnon  | Fired when the compass is turned on.                                                                                                                                                                                                                        |
 | turnoff | Fired when the compass is turned off.                                                                                                                                                                                                                       |
+| error   | Fired when the compass cannot be accessed due to permission denied or a timeout.                                                                                                                                                                            |
 | compass | Fired when the device orientation changes. <br> A `heading` number represents the difference between the motion of the device around the z axis of the world system and the direction of the north, expressed in degrees with values ranging from 0 to 360. |
 
 ## Reference

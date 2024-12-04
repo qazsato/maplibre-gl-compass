@@ -2,6 +2,11 @@ import { IControl, Map } from 'maplibre-gl'
 import { CompassButton } from './components/CompassButton'
 import { DebugView } from './components/DebugView'
 
+export type CompassError = {
+  code: 'TIMEOUT' | 'PERMISSION_DENIED'
+  message: string
+}
+
 export type CompassEvent = {
   heading: number | undefined
   originalEvent: WebkitDeviceOrientationEvent
@@ -25,7 +30,7 @@ const defaultOptions: CompassControlOptions = {
   timeout: 3000, // ms
 }
 
-const eventTypes = ['compass', 'turnon', 'turnoff']
+const eventTypes = ['turnon', 'turnoff', 'error', 'compass']
 
 export class CompassControl implements IControl {
   private map: Map | undefined
@@ -38,9 +43,10 @@ export class CompassControl implements IControl {
   private currentEvent: WebkitDeviceOrientationEvent | undefined
   private currentHeading: number | undefined
 
-  private compassCallback: ((event: CompassEvent) => void) | undefined
   private turnonCallback: (() => void) | undefined
   private turnoffCallback: (() => void) | undefined
+  private errorCallback: ((error: CompassError) => void) | undefined
+  private compassCallback: ((event: CompassEvent) => void) | undefined
 
   constructor(options?: CompassControlOptions) {
     this.options = { ...defaultOptions, ...options }
@@ -72,14 +78,17 @@ export class CompassControl implements IControl {
       throw new Error(`Event type ${type} is not supported.`)
     }
     switch (type) {
-      case 'compass':
-        this.compassCallback = callback
-        break
       case 'turnon':
         this.turnonCallback = callback
         break
       case 'turnoff':
         this.turnoffCallback = callback
+        break
+      case 'error':
+        this.errorCallback = callback
+        break
+      case 'compass':
+        this.compassCallback = callback
         break
     }
   }
@@ -92,6 +101,9 @@ export class CompassControl implements IControl {
     setTimeout(() => {
       if (this.active && this.currentHeading === undefined) {
         this.disable()
+        if (this.errorCallback) {
+          this.errorCallback({ code: 'TIMEOUT', message: 'Timeout' })
+        }
       }
     }, this.options.timeout)
 
@@ -145,10 +157,22 @@ export class CompassControl implements IControl {
             )
           } else {
             this.disable()
+            if (this.errorCallback) {
+              this.errorCallback({
+                code: 'PERMISSION_DENIED',
+                message: 'Permission denied',
+              })
+            }
           }
         })
         .catch(() => {
           this.disable()
+          if (this.errorCallback) {
+            this.errorCallback({
+              code: 'PERMISSION_DENIED',
+              message: 'Permission denied',
+            })
+          }
         })
       return
     }
