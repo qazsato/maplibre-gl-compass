@@ -9,7 +9,7 @@ A **heading-up** compass for MapLibre GL JS 🧭
 ## About
 
 **maplibre-gl-compass** is a plugin for MapLibre GL JS.  
-This plugin rotates the map based on the values from the [deviceorientation event](https://developer.mozilla.org/en-US/docs/Web/API/Window/deviceorientationabsolute_event).  
+This plugin rotates the map based on the values from the [Device orientation events](https://developer.mozilla.org/en-US/docs/Web/API/Device_orientation_events).  
 Therefore, it can only be used on devices equipped with an orientation sensor, such as mobile devices.
 
 Demo page is [here](https://qazsato.github.io/maplibre-gl-compass).
@@ -80,11 +80,11 @@ map.addControl(compass)
 
 ## Events
 
-| name    | description                                                                                                                                                                                                                                                     |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| turnon  | Triggered when the compass is turned on.                                                                                                                                                                                                                        |
-| turnoff | Triggered when the compass is turned off.                                                                                                                                                                                                                       |
-| compass | Triggered when the device orientation changes. <br> A `heading` number represents the difference between the motion of the device around the z axis of the world system and the direction of the north, expressed in degrees with values ranging from 0 to 360. |
+| name    | description                                                                                                                                                                                                                                                 |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| turnon  | Fired when the compass is turned on.                                                                                                                                                                                                                        |
+| turnoff | Fired when the compass is turned off.                                                                                                                                                                                                                       |
+| compass | Fired when the device orientation changes. <br> A `heading` number represents the difference between the motion of the device around the z axis of the world system and the direction of the north, expressed in degrees with values ranging from 0 to 360. |
 
 ## Reference
 
