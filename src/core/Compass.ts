@@ -14,81 +14,87 @@ export type WebkitDeviceOrientationEvent = DeviceOrientationEvent & {
   webkitCompassAccuracy?: number
 }
 
-const eventTypes = ['deviceorientation', 'error']
-
 export class Compass {
+  private static readonly eventTypes = ['deviceorientation', 'error'] as const
   private deviceOrientationCallback: ((event: CompassEvent) => void) | undefined
   private errorCallback: ((error: CompassError) => void) | undefined
+  private isListening = false
 
-  on(type: string, callback: any) {
-    if (!eventTypes.includes(type)) {
+  on(
+    type: (typeof Compass.eventTypes)[number],
+    callback: ((event: CompassEvent) => void) | ((error: CompassError) => void),
+  ) {
+    if (!Compass.eventTypes.includes(type)) {
       throw new Error(`Event type ${type} is not supported.`)
     }
     switch (type) {
       case 'deviceorientation':
-        this.deviceOrientationCallback = callback
+        this.deviceOrientationCallback = callback as (
+          event: CompassEvent,
+        ) => void
         break
       case 'error':
-        this.errorCallback = callback
+        this.errorCallback = callback as (error: CompassError) => void
         break
     }
   }
 
   turnOn() {
-    this.listenDeviceOrientation()
-    this.listenDeviceOrientationAbsolute()
+    if (this.isListening) {
+      return
+    }
+    this.addDeviceOrientationListener()
+    this.addDeviceOrientationAbsoluteListener()
+    this.isListening = true
   }
 
   turnOff() {
-    window.removeEventListener(
-      'deviceorientation',
-      this.onDeviceOrientation,
-      true,
-    )
-    window.removeEventListener(
-      'deviceorientationabsolute',
-      this.onDeviceOrientation,
-      true,
-    )
+    this.removeDeviceOrientationListener()
+    this.removeDeviceOrientationAbsoluteListener()
+    this.isListening = false
   }
 
-  private listenDeviceOrientation() {
+  private addDeviceOrientationListener() {
     // For iOS 13 and later
     // refs: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent#browser_compatibility
     if ('requestPermission' in window.DeviceOrientationEvent) {
       // @ts-ignore
       window.DeviceOrientationEvent.requestPermission()
         .then((response: string) => {
-          if (response === 'granted') {
-            window.addEventListener(
-              'deviceorientation',
-              this.onDeviceOrientation,
-              true,
-            )
-          } else {
-            if (this.errorCallback) {
-              this.errorCallback({
-                code: 'PERMISSION_DENIED',
-                message: 'Permission denied',
-              })
-            }
+          if (response !== 'granted') {
+            this.handleError('PERMISSION_DENIED', 'Permission denied')
+            return
           }
+          window.addEventListener(
+            'deviceorientation',
+            this.onDeviceOrientation,
+            true,
+          )
         })
-        .catch(() => {
-          if (this.errorCallback) {
-            this.errorCallback({
-              code: 'PERMISSION_DENIED',
-              message: 'Permission denied',
-            })
-          }
-        })
+        .catch(() => this.handleError('PERMISSION_DENIED', 'Permission denied'))
       return
     }
     window.addEventListener('deviceorientation', this.onDeviceOrientation, true)
   }
 
-  private listenDeviceOrientationAbsolute() {
+  private removeDeviceOrientationListener() {
+    window.removeEventListener(
+      'deviceorientation',
+      this.onDeviceOrientation,
+      true,
+    )
+  }
+
+  private addDeviceOrientationAbsoluteListener() {
     window.addEventListener(
+      'deviceorientationabsolute',
+      this.onDeviceOrientation,
+      true,
+    )
+  }
+
+  private removeDeviceOrientationAbsoluteListener() {
+    window.removeEventListener(
       'deviceorientationabsolute',
       this.onDeviceOrientation,
       true,
@@ -97,20 +103,12 @@ export class Compass {
 
   private onDeviceOrientation = (event: WebkitDeviceOrientationEvent) => {
     if (event.type === 'deviceorientationabsolute' && event.alpha != null) {
-      window.removeEventListener(
-        'deviceorientation',
-        this.onDeviceOrientation,
-        true,
-      )
+      this.removeDeviceOrientationListener()
     } else if (
       event.type === 'deviceorientation' &&
       event.webkitCompassHeading != null
     ) {
-      window.removeEventListener(
-        'deviceorientationabsolute',
-        this.onDeviceOrientation,
-        true,
-      )
+      this.removeDeviceOrientationAbsoluteListener()
     }
 
     if (this.deviceOrientationCallback) {
@@ -133,5 +131,9 @@ export class Compass {
       compassHeading += 360
     }
     return compassHeading
+  }
+
+  private handleError(code: 'TIMEOUT' | 'PERMISSION_DENIED', message: string) {
+    this.errorCallback?.({ code, message })
   }
 }

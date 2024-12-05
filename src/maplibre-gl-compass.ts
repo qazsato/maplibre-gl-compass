@@ -1,12 +1,8 @@
 import { IControl, Map } from 'maplibre-gl'
 import { CompassButton } from './components/CompassButton'
 import { DebugView } from './components/DebugView'
-import {
-  CompassEvent,
-  CompassError,
-  WebkitDeviceOrientationEvent,
-  Compass,
-} from './core/Compass'
+import type { CompassEvent, CompassError } from './core/Compass'
+import { Compass } from './core/Compass'
 
 type CompassControlOptions = {
   debug?: boolean
@@ -31,8 +27,7 @@ export class CompassControl implements IControl {
   private options: CompassControlOptions
 
   private active = false
-  private currentEvent: WebkitDeviceOrientationEvent | undefined
-  private currentHeading: number | undefined
+  private currentEvent: CompassEvent | undefined
 
   private turnonCallback: (() => void) | undefined
   private turnoffCallback: (() => void) | undefined
@@ -44,17 +39,17 @@ export class CompassControl implements IControl {
     this.compass = new Compass()
     this.compass.on('deviceorientation', (event: CompassEvent) => {
       if (!this.map) return
-      this.currentEvent = event.originalEvent as WebkitDeviceOrientationEvent
-      this.currentHeading = event.heading
+      this.currentEvent = event
+      const heading = event.heading
       if (this.options.debug) {
         this.updateDebugView()
       }
-      if (this.currentHeading === undefined) {
+      if (heading === undefined) {
         return
       }
       const bearing = this.map.getBearing()
-      if (Math.abs(this.currentHeading - bearing) >= 1) {
-        this.map?.setBearing(this.currentHeading)
+      if (Math.abs(heading - bearing) >= 1) {
+        this.map?.setBearing(heading)
       }
       this.compassButton.stopLoading()
 
@@ -117,7 +112,7 @@ export class CompassControl implements IControl {
     this.compassButton.turnOn()
 
     setTimeout(() => {
-      if (this.active && this.currentHeading === undefined) {
+      if (this.active && this.currentEvent?.heading === undefined) {
         this.disable()
         if (this.errorCallback) {
           this.errorCallback({ code: 'TIMEOUT', message: 'Timeout' })
@@ -152,7 +147,7 @@ export class CompassControl implements IControl {
   }
 
   private updateDebugView() {
-    this.debugView?.update(this.currentHeading, this.currentEvent)
+    this.debugView?.update(this.currentEvent)
   }
 
   private clearDebugView() {
