@@ -148,8 +148,23 @@ export class Compass {
     if (this.headingHistory.length === 0) {
       return undefined
     }
-    const sum = this.headingHistory.reduce((acc, heading) => acc + heading, 0)
-    return sum / this.headingHistory.length
+    const sinSum = this.headingHistory.reduce(
+      (acc, heading) => acc + Math.sin((heading * Math.PI) / 180),
+      0,
+    )
+    const cosSum = this.headingHistory.reduce(
+      (acc, heading) => acc + Math.cos((heading * Math.PI) / 180),
+      0,
+    )
+    const averageRadians = Math.atan2(
+      sinSum / this.headingHistory.length,
+      cosSum / this.headingHistory.length,
+    )
+    let averageDegrees = (averageRadians * 180) / Math.PI
+    if (averageDegrees < 0) {
+      averageDegrees += 360
+    }
+    return averageDegrees
   }
 
   private handleError(code: 'TIMEOUT' | 'PERMISSION_DENIED', message: string) {
