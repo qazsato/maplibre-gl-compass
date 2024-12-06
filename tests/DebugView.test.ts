@@ -30,7 +30,7 @@ describe('DebugView', () => {
       } as WebkitDeviceOrientationEvent,
     })
     const headingSpan = parentElement.querySelector('.heading')
-    expect(headingSpan?.textContent).toBe('180.123')
+    expect(headingSpan?.textContent).toBe('180.1230')
   })
 
   it('should handle missing elements gracefully', () => {
