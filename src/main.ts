@@ -18,12 +18,37 @@ const map = new Map({
 })
 const protocol = new Protocol()
 addProtocol('pmtiles', protocol.tile)
+
+let userOperating = false
+map.on('touchstart', () => (userOperating = true))
+map.on('touchend', () => (userOperating = false))
+map.on('mousedown', () => (userOperating = true))
+map.on('mouseup', () => (userOperating = false))
+map.on('wheel', () => {
+  userOperating = true
+  setTimeout(() => (userOperating = false), 100)
+})
+
 const compass = new CompassControl({
   debug: true,
 })
 
+const geolocate = new GeolocateControl({
+  positionOptions: { enableHighAccuracy: true },
+  trackUserLocation: true,
+})
+
+geolocate.on('userlocationlostfocus', () => {
+  if (!userOperating) {
+    geolocate.trigger()
+  }
+})
+
 compass.on('turnon', () => {
   map.setPitch(45)
+  if (!['ACTIVE_LOCK'].includes(geolocate._watchState)) {
+    geolocate.trigger()
+  }
 })
 
 compass.on('turnoff', () => {
@@ -32,10 +57,5 @@ compass.on('turnoff', () => {
 })
 
 map.addControl(new NavigationControl({ showCompass: false }))
-map.addControl(
-  new GeolocateControl({
-    positionOptions: { enableHighAccuracy: true },
-    trackUserLocation: true,
-  }),
-)
+map.addControl(geolocate)
 map.addControl(compass)
