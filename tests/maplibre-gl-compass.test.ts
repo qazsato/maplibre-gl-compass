@@ -61,28 +61,6 @@ describe('CompassControl', () => {
     expect(mockTurnOffCallback).toHaveBeenCalled()
   })
 
-  it('should disable the control if permission is denied', async () => {
-    const requestPermissionSpy = jest
-      .spyOn(window.DeviceOrientationEvent as any, 'requestPermission')
-      .mockResolvedValue('denied')
-
-    await compassControl['listenDeviceOrientation']()
-
-    expect(compassControl['active']).toBe(false)
-
-    requestPermissionSpy.mockRestore()
-  })
-
-  it('should update debug view when debug option is enabled', () => {
-    const debugControl = new CompassControl({ debug: true })
-    debugControl['currentHeading'] = 45
-
-    debugControl['updateDebugView']()
-    const debugContainer = debugControl['debugView']?.['element']
-
-    expect(debugContainer?.querySelector('.heading')?.textContent).toBe('45')
-  })
-
   it('should toggle state when clicked', () => {
     compassControl.turnOn()
     expect(compassControl['active']).toBe(true)

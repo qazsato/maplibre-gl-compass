@@ -1,4 +1,4 @@
-import { WebkitDeviceOrientationEvent } from '../maplibre-gl-compass'
+import type { CompassEvent } from '../core/Compass'
 import './DebugView.css'
 
 export class DebugView {
@@ -19,16 +19,16 @@ export class DebugView {
     parent.appendChild(this.element)
   }
 
-  update(heading?: number, event?: WebkitDeviceOrientationEvent) {
+  update(event?: CompassEvent) {
     const eventName = this.element.querySelector('.event-name')
     const headingSpan = this.element.querySelector('.heading')
     const alphaSpan = this.element.querySelector('.alpha')
     const betaSpan = this.element.querySelector('.beta')
     const gammaSpan = this.element.querySelector('.gamma')
-    if (eventName) eventName.textContent = event?.type || ''
-    if (headingSpan) headingSpan.textContent = `${heading || ''}`
-    if (alphaSpan) alphaSpan.textContent = `${event?.alpha || ''}`
-    if (betaSpan) betaSpan.textContent = `${event?.beta || ''}`
-    if (gammaSpan) gammaSpan.textContent = `${event?.gamma || ''}`
+    if (eventName) eventName.textContent = event?.originalEvent.type || ''
+    if (headingSpan) headingSpan.textContent = `${event?.heading || ''}`
+    if (alphaSpan) alphaSpan.textContent = `${event?.originalEvent.alpha || ''}`
+    if (betaSpan) betaSpan.textContent = `${event?.originalEvent.beta || ''}`
+    if (gammaSpan) gammaSpan.textContent = `${event?.originalEvent.gamma || ''}`
   }
 }
