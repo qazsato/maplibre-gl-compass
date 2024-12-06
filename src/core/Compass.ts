@@ -19,6 +19,8 @@ export class Compass {
   private deviceOrientationCallback: ((event: CompassEvent) => void) | undefined
   private errorCallback: ((error: CompassError) => void) | undefined
   private isListening = false
+  private historySize = 100
+  private headingHistory: number[] = []
 
   on(
     type: (typeof Compass.eventTypes)[number],
@@ -111,9 +113,18 @@ export class Compass {
       this.removeDeviceOrientationAbsoluteListener()
     }
 
+    const heading = this.calculateCompassHeading(event)
+    if (heading != null) {
+      this.headingHistory.push(heading)
+      if (this.headingHistory.length > this.historySize) {
+        this.headingHistory.shift()
+      }
+    }
+    const averageHeading = this.calculateMovingAverage()
+
     if (this.deviceOrientationCallback) {
       this.deviceOrientationCallback({
-        heading: this.calculateCompassHeading(event),
+        heading: averageHeading,
         originalEvent: event,
       })
     }
@@ -131,6 +142,29 @@ export class Compass {
       compassHeading += 360
     }
     return compassHeading
+  }
+
+  private calculateMovingAverage() {
+    if (this.headingHistory.length === 0) {
+      return undefined
+    }
+    const sinSum = this.headingHistory.reduce(
+      (acc, heading) => acc + Math.sin((heading * Math.PI) / 180),
+      0,
+    )
+    const cosSum = this.headingHistory.reduce(
+      (acc, heading) => acc + Math.cos((heading * Math.PI) / 180),
+      0,
+    )
+    const averageRadians = Math.atan2(
+      sinSum / this.headingHistory.length,
+      cosSum / this.headingHistory.length,
+    )
+    let averageDegrees = (averageRadians * 180) / Math.PI
+    if (averageDegrees < 0) {
+      averageDegrees += 360
+    }
+    return averageDegrees
   }
 
   private handleError(code: 'TIMEOUT' | 'PERMISSION_DENIED', message: string) {
