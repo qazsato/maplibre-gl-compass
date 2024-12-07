@@ -37,26 +37,26 @@ export class CompassControl implements IControl {
   constructor(options?: CompassControlOptions) {
     this.options = { ...defaultOptions, ...options }
     this.compass = new Compass()
+
     this.compass.on('deviceorientation', (event: CompassEvent) => {
-      if (!this.map) return
+      if (!this.map || event.heading === undefined) {
+        return
+      }
       this.currentEvent = event
+      this.compassButton.stopLoading()
       const heading = event.heading
+      const bearing = this.map.getBearing()
+      if (!this.map.isZooming() && Math.abs(heading - bearing) >= 1) {
+        this.map.setBearing(heading)
+      }
       if (this.options.debug) {
         this.updateDebugView()
       }
-      if (heading === undefined) {
-        return
-      }
-      const bearing = this.map.getBearing()
-      if (Math.abs(heading - bearing) >= 1) {
-        this.map?.setBearing(heading)
-      }
-      this.compassButton.stopLoading()
-
       if (this.compassCallback) {
         this.compassCallback(event)
       }
     })
+
     this.compass.on('error', (error: CompassError) => {
       this.disable()
       if (this.errorCallback) {
@@ -65,7 +65,14 @@ export class CompassControl implements IControl {
     })
 
     this.compassButton = new CompassButton(this.container)
-    this.compassButton.on('click', () => this.onClick())
+
+    this.compassButton.on('click', () => {
+      if (this.active) {
+        this.turnOff()
+      } else {
+        this.turnOn()
+      }
+    })
     if (this.options.debug) {
       this.debugView = new DebugView(this.container)
     }
@@ -79,6 +86,7 @@ export class CompassControl implements IControl {
         this.active = false
       }
     })
+
     return this.container
   }
 
@@ -136,14 +144,6 @@ export class CompassControl implements IControl {
       this.turnoffCallback()
     }
     this.active = false
-  }
-
-  private onClick() {
-    if (this.active) {
-      this.turnOff()
-    } else {
-      this.turnOn()
-    }
   }
 
   private updateDebugView() {
