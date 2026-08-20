@@ -47,7 +47,9 @@ export class CompassControl implements IControl {
       const heading = event.heading
       const bearing = this.map.getBearing()
       if (!this.map.isZooming() && Math.abs(heading - bearing) >= 1) {
-        this.map.setBearing(heading)
+        this.map.setBearing(heading, {
+            geolocateSource: true // tag this camera change so it won't cause the geolocate control to lose its active lock
+        })
       }
       if (this.options.debug) {
         this.updateDebugView()
