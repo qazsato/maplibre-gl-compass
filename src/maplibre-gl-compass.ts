@@ -64,7 +64,10 @@ export class CompassControl implements IControl {
       }
     })
 
-    this.compassButton = new CompassButton(this.container)
+    this.compassButton = new CompassButton(
+      this.container,
+      this.options.visible,
+    )
 
     this.compassButton.on('click', () => {
       if (this.active) {
