@@ -74,4 +74,13 @@ describe('CompassControl', () => {
       'Event type unsupportedEvent is not supported.',
     )
   })
+
+  it('should hide the compass button when visible is false', () => {
+    const hiddenControl = new CompassControl({ visible: false })
+    const container = hiddenControl.onAdd(map)
+    const buttonContainer = container.querySelector(
+      '.maplibregl-ctrl',
+    ) as HTMLDivElement
+    expect(buttonContainer.style.display).toBe('none')
+  })
 })
